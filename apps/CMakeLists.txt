@@ -1,0 +1,5 @@
+add_executable(seq_test seq_app.cpp)
+add_executable(lock_test lock_app_base.cpp)
+add_executable(atomic_test atomic_app_base.cpp)
+add_executable(lock_adv lock_app_adv.cpp)
+add_executable(atomic_adv atomic_app_adv.cpp)
