@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/locked_buffer.h
+memory
+-
+mutex
+-
+condition_variable
+-
+atomic
+-
+
+/home/alamo/Documents/arquitecturaComputadors/atomic/apps/lock_app_adv.cpp
+locked_buffer.h
+/home/alamo/Documents/arquitecturaComputadors/atomic/apps/locked_buffer.h
+thread
+-
+iostream
+-
+vector
+-
+cmath
+-
+complex
+-
+iomanip
+-
+utility
+-
+fstream
+-
+

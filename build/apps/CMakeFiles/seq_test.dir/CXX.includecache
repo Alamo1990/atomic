@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/alamo/Documents/arquitecturaComputadors/atomic/apps/seq_app.cpp
+thread
+-
+iostream
+-
+vector
+-
+cmath
+-
+complex
+-
+iomanip
+-
+utility
+-
+fstream
+-
+

@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11 -Wall -Wextra -Wno-deprecated -Werror -pedantic -pedantic-errors -pthread   CMakeFiles/lock_adv.dir/lock_app_adv.cpp.o  -o ../lock_adv -rdynamic 
