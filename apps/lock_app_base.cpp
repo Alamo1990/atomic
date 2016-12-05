@@ -142,11 +142,12 @@ int main(int argc, char* argv[]){
         //auto queue1 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> (nitems);
 
         std::thread threads[5];
-
+        
         threads[0] = std::thread(mandelbrotLoop, nitems, queue1);
         threads[1] = std::thread(FFT, queue1, queue2);
         threads[2] = std::thread(Blur, queue2, queue3);
         threads[3] = std::thread(IFFT, queue3, queue4);
+        threads[4] = std::thread(print, queue4);
         // auto imageSt1 = FFT(image);
         // auto imageSt2 = Blur(imageSt1);
         // auto imageSt3 = IFFT(imageSt2);
