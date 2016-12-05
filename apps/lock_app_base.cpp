@@ -138,7 +138,7 @@ int main(int argc, char* argv[]){
         std::thread threads[5];
 
         threads[0] = std::thread(mandelbrotLoop, nitems, queue1);
-        // auto imageSt1 = FFT(image);
+        threads[0] = std::thread(FFT, queue1, queue2);
         // auto imageSt2 = Blur(imageSt1);
         // auto imageSt3 = IFFT(imageSt2);
         // print(imageSt3);
