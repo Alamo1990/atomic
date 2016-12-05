@@ -133,7 +133,7 @@ int main(int argc, char* argv[]){
         }
         const long nitems = std::stol(argv[1]);
 
-        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >::locked_buffer(nitems) queue1; //no se que le pasa, pero me da asco
+        auto queue1 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(nitems); //no se que le pasa, pero me da asco
 
         std::thread threads[5];
 
