@@ -3,4 +3,4 @@
 
 apps/CMakeFiles/lock_adv.dir/lock_app_adv.cpp.o
  ../include/locked_buffer.h
- /home/alamo/Documents/arquitecturaComputadors/atomic/apps/lock_app_adv.cpp
+ /home/blayhem/Github/atomic/apps/lock_app_adv.cpp

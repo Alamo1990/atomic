@@ -6,19 +6,9 @@
 
 #IncludeRegexTransform: 
 
+/home/blayhem/Github/atomic/apps/lock_app_base.cpp
 ../include/locked_buffer.h
-memory
--
-mutex
--
-condition_variable
--
-atomic
--
-
-/home/alamo/Documents/arquitecturaComputadors/atomic/apps/lock_app_base.cpp
-locked_buffer.h
-/home/alamo/Documents/arquitecturaComputadors/atomic/apps/locked_buffer.h
+/home/blayhem/Github/atomic/include/locked_buffer.h
 thread
 -
 iostream
@@ -34,5 +24,15 @@ iomanip
 utility
 -
 fstream
+-
+
+/home/blayhem/Github/atomic/include/locked_buffer.h
+memory
+-
+mutex
+-
+condition_variable
+-
+atomic
 -
 

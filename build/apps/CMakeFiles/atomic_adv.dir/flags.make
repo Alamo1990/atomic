@@ -6,5 +6,5 @@ CXX_FLAGS = -std=c++11 -Wall -Wextra -Wno-deprecated -Werror -pedantic -pedantic
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/alamo/Documents/arquitecturaComputadors/atomic/include 
+CXX_INCLUDES = -I/home/blayhem/Github/atomic/include 
 
