@@ -115,12 +115,12 @@ void print(std::pair<int, std::vector<std::vector<unsigned char> > > image){
         }
         file.close();
 }
-void mandelbrotLoop(int nitems, locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > > queue1){
+void mandelbrotLoop(int nitems, locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1){
         for(int i = 0; i<nitems; i++) {
                 double MaxRe = 0.1 + i *0.1;
                 double MinRe = -2.0 - i *0.1;
                 double MinIm = -1.2 - i *0.1;
-                queue1.put(mandelbrot(MaxRe, MinRe, MinIm, i), true);  // no se si true o false
+                queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), true);  // no se si true o false
         }
 }
 
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]){
         }
         const long nitems = std::stol(argv[1]);
 
-        auto queue1 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(nitems); //no se que le pasa, pero me da asco
+        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1; //no se que le pasa, pero me da asco
 
         std::thread threads[5];
 
