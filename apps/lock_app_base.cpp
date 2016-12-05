@@ -115,6 +115,7 @@ void print(std::pair<int, std::vector<std::vector<unsigned char> > > image){
         }
         file.close();
 }
+
 void mandelbrotLoop(int nitems, locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>>* queue1){
         for(int i = 0; i<nitems; i++) {
                 double MaxRe = 0.1 + i *0.1;
