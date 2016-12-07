@@ -152,17 +152,12 @@ int main(int argc, char* argv[]){
         const long nitems = std::stol(argv[1]);
 
         //locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> *queue1;// = new locked_buffer(nitems);
-        << << <<< HEAD
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1;
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue2;
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue3;
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4;
-        =======
-                locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1;
-        // locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>>* queue2;
-        // locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>>* queue3;
-        // locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>>* queue4;
-        >> >> >>> f31354441d2ab8fdad32483b41ad81c0cfed8c23
+
+
         //auto queue1 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> (nitems);
 
         std::thread threads[5];
