@@ -7,10 +7,13 @@
 #include <iomanip>
 #include <utility>
 #include <fstream>
+#include <atomic>
 
 #define NTHREADS 4
 constexpr int ImageHeight = 36;
 constexpr int ImageWidth = 36;
+
+std::atomic<int> flag(0);
 
 
 std::pair<int,std::vector<std::vector<unsigned char> > > mandelbrot(double MaxRe, double MinRe, double MinIm, int order){
@@ -122,26 +125,34 @@ void looper(int mode, int nitems, atomic_buffer<std::pair<int,std::vector<std::v
             atomic_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3,
             atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 ){
         enum exec { M, F, B, I, P };
-
+        bool last = false;
         for(int i = 0; i<nitems; i++) {
                 double MaxRe = 0.1 + i *0.1;
                 double MinRe = -2.0 - i *0.1;
                 double MinIm = -1.2 - i *0.1;
-                //queue->put(mandelbrot(MaxRe, MinRe, MinIm, i), true);  // no se si true o false
+                if(i == (nitems-1)) last=true;
+
                 switch (mode) {
                 case M:
-                        mandelbrot(MaxRe, MinRe, MinIm, i);
+                        queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), last); // no se si true o false
                         break;
-                case F:
-                        FFT((i, queue));
+                case F: {
+                        auto image = std::get<1>(queue1->get());
+                        queue2->put(FFT(image), last);
+                }
+                break;
+                case B: {
+                        auto image = std::get<1>(queue2->get());
+                        queue3->put(Blur(image), last);
                         break;
-                case B:
-                        Blur(queue);
+                }
+                case I: {
+                        auto image = std::get<1>(queue3->get());
+                        queue4->put(IFFT(image), last);
+                } break;
+                case P:
+                        print(std::get<1>(queue4->get()));
                         break;
-                case I:
-                        IFFT()
-                        break;
-                case P:                 break;
                 }
         }
 }
@@ -166,17 +177,6 @@ int main(int argc, char* argv[]){
         threads[2] = std::thread(looper, 2, nitems, queue1, queue2, queue3, queue4);
         threads[3] = std::thread(looper, 3, nitems, queue1, queue2, queue3, queue4);
         threads[4] = std::thread(looper, 4, nitems, queue1, queue2, queue3, queue4);
-
-        // for(int i = 0; i<nitems;i++){
-        //     double MaxRe = 0.1 + i *0.1;
-        //     double MinRe = -2.0 - i *0.1;
-        //     double MinIm = -1.2 - i *0.1;
-        //     auto image = mandelbrot(MaxRe, MinRe, MinIm, i);
-        //     auto imageSt1 = FFT(image);
-        //     auto imageSt2 = Blur(imageSt1);
-        //     auto imageSt3 = IFFT(imageSt2);
-        //     print(imageSt3);
-        // }
 
 
         return 0;

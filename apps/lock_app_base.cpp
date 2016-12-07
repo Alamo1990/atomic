@@ -159,7 +159,6 @@ int main(int argc, char* argv[]){
         const long nitems = std::stol(argv[1]);
 
         //locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> *queue1;// = new locked_buffer(nitems);
-
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1;
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue2;
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue3;
