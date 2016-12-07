@@ -155,17 +155,18 @@ void looper(int mode, int nitems, locked_buffer<std::pair<int,std::vector<std::v
 }
 
 int main(int argc, char* argv[]){
-        if(argc != 2) {
+        if(argc != 3) {
                 std::cerr<<"Wrong arguments"<<std::endl;
                 std::cerr<<"Valid formats: "<<std::endl;
                 std::cerr<< " " << argv[0] << "nitems" << std::endl;
         }
         const long nitems = std::stol(argv[1]);
+        const int buff_size = std::stoi(argv[2]);
 
-        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1;
-        locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2;
-        locked_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3;
-        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4;
+        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size);
+        locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2 = new locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >(buff_size);
+        locked_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3 = new locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >(buff_size);
+        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size);
 
         std::thread threads[5];
 

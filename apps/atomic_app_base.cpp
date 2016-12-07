@@ -154,18 +154,19 @@ void looper(int mode, int nitems, atomic_buffer<std::pair<int,std::vector<std::v
 }
 
 int main(int argc, char* argv[]){
-        if(argc != 2) {
+        if(argc != 3) {
                 std::cerr<<"Wrong arguments"<<std::endl;
                 std::cerr<<"Valid formats: "<<std::endl;
                 std::cerr<< " " << argv[0] << "nitems" << std::endl;
         }
         const long nitems = std::stol(argv[1]);
+        const int buff_size = std::stoi(argv[2]);
 
-        atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1;
-        atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2;
-        atomic_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3;
-        atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4;
-
+        atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1 = new atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size);
+        atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2 = new atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >(buff_size);
+        atomic_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3 = new atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >(buff_size);
+        atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 = new atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size);
+//
         std::thread threads[5];
         std::cout << "3" << std::endl;
         threads[0] = std::thread(looper, 0, nitems, queue1, queue2, queue3, queue4);
