@@ -13,7 +13,10 @@
 constexpr int ImageHeight = 36;
 constexpr int ImageWidth = 36;
 
-std::atomic<int> flag(0);
+std::atomic<int> flag1(0);
+std::atomic<int> flag2(0);
+std::atomic<int> flag3(0);
+std::atomic<int> flag4(0);
 
 
 std::pair<int,std::vector<std::vector<unsigned char> > > mandelbrot(double MaxRe, double MinRe, double MinIm, int order){
