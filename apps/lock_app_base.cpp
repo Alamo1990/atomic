@@ -143,11 +143,15 @@ int main(int argc, char* argv[]){
 
         std::thread threads[5];
 
-        threads[0] = std::thread(looper, 0, nitems, queue1);
-        threads[1] = std::thread(looper, 1, queue1, queue2);
-        threads[2] = std::thread(looper, 2, queue2, queue3);
-        threads[3] = std::thread(looper, 3, queue3, queue4);
-        threads[4] = std::thread(looper, 4, queue4);
+        threads[0] = std::thread(mandelbrotLoop, nitems, queue1);
+        threads[1] = std::thread(FFT, queue1, queue2);
+        threads[2] = std::thread(Blur, queue2, queue3);
+        threads[3] = std::thread(IFFT, queue3, queue4);
+        threads[4] = std::thread(print, queue4);
+        // auto imageSt1 = FFT(image);
+        // auto imageSt2 = Blur(imageSt1);
+        // auto imageSt3 = IFFT(imageSt2);
+        // print(imageSt3);
 
         return 0;
 }
