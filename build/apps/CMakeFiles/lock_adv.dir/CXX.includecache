@@ -16,9 +16,9 @@ condition_variable
 atomic
 -
 
-/home/alamo/Documents/arquitecturaComputadors/atomic/apps/lock_app_adv.cpp
+/home/blayhem/Github/atomic/apps/lock_app_adv.cpp
 locked_buffer.h
-/home/alamo/Documents/arquitecturaComputadors/atomic/apps/locked_buffer.h
+/home/blayhem/Github/atomic/apps/locked_buffer.h
 thread
 -
 iostream

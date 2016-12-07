@@ -115,7 +115,8 @@ void print(std::pair<int, std::vector<std::vector<unsigned char> > > image){
         }
         file.close();
 }
-void mandelbrotLoop(int nitems, locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1){
+
+void looper(int nitems, locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1){
         for(int i = 0; i<nitems; i++) {
                 double MaxRe = 0.1 + i *0.1;
                 double MinRe = -2.0 - i *0.1;
@@ -133,17 +134,20 @@ int main(int argc, char* argv[]){
         }
         const long nitems = std::stol(argv[1]);
 
-        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1; //no se que le pasa, pero me da asco
+        //locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> *queue1;// = new locked_buffer(nitems);
+        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1;
+        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue2;
+        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue3;
+        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4;
+        //auto queue1 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> (nitems);
 
         std::thread threads[5];
 
-        threads[0] = std::thread(mandelbrotLoop, nitems, queue1);
-        threads[0] = std::thread(FFT, queue1, queue2);
-        // auto imageSt2 = Blur(imageSt1);
-        // auto imageSt3 = IFFT(imageSt2);
-        // print(imageSt3);
-
-
+        threads[0] = std::thread(looper, 0, nitems, queue1);
+        threads[1] = std::thread(looper, 1, queue1, queue2);
+        threads[2] = std::thread(looper, 2, queue2, queue3);
+        threads[3] = std::thread(looper, 3, queue3, queue4);
+        threads[4] = std::thread(looper, 4, queue4);
 
         return 0;
 }
