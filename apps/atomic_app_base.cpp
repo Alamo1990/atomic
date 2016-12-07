@@ -167,14 +167,20 @@ int main(int argc, char* argv[]){
         atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4;
 
         std::thread threads[5];
-
+        std::cout << "3" << std::endl;
         threads[0] = std::thread(looper, 0, nitems, queue1, queue2, queue3, queue4);
+        std::cout << "4" << std::endl;
         threads[1] = std::thread(looper, 1, nitems, queue1, queue2, queue3, queue4);
+        std::cout << "5" << std::endl;
         threads[2] = std::thread(looper, 2, nitems, queue1, queue2, queue3, queue4);
+        std::cout << "6" << std::endl;
         threads[3] = std::thread(looper, 3, nitems, queue1, queue2, queue3, queue4);
+        std::cout << "7" << std::endl;
         threads[4] = std::thread(looper, 4, nitems, queue1, queue2, queue3, queue4);
+        std::cout << "8" << std::endl;
 
         for(auto& th : threads) th.join();
+
 
         return 0;
 }
