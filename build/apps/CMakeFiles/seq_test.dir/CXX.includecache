@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/blayhem/Github/atomic/apps/seq_app.cpp
+/home/alamo/Documents/arquitecturaComputadors/atomic/apps/seq_app.cpp
 thread
 -
 iostream

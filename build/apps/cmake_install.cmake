@@ -1,4 +1,4 @@
-# Install script for directory: /home/blayhem/Github/atomic/apps
+# Install script for directory: /home/alamo/Documents/arquitecturaComputadors/atomic/apps
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

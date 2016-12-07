@@ -116,39 +116,43 @@ void print(std::pair<int, std::vector<std::vector<unsigned char> > > image){
         file.close();
 }
 
+
 void looper(int mode, int nitems, locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1,
             locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2,
             locked_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3,
             locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 ){
         enum exec { M, F, B, I, P };
-
+        bool last = false;
         for(int i = 0; i<nitems; i++) {
                 double MaxRe = 0.1 + i *0.1;
                 double MinRe = -2.0 - i *0.1;
                 double MinIm = -1.2 - i *0.1;
-                bool last = (i==nitems-1);
-                //queue->put(mandelbrot(MaxRe, MinRe, MinIm, i), true);  // no se si true o false
+                if(i == (nitems-1)) last=true;
+
                 switch (mode) {
-                case M: {
+                case M:
+                        queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), last); // no se si true o false
+                        break;
+                case F: {
                         auto image = std::get<1>(queue1->get());
-                        queue2->put(mandelbrot(MaxRe, MinRe, MinIm, i);
-                        }
+                        queue2->put(FFT(image), last);
+                }
+                break;
+                case B: {
+                        auto image = std::get<1>(queue2->get());
+                        queue3->put(Blur(image), last);
                         break;
-                case F:
-                        FFT(std::get<1>(queue1->get()));
-                        break;
-                case B:
-                        Blur(std::get<1>(queue2->get()));
-                        break;
-                case I:
-                        IFFT(std::get<1>(queue3->get()));
-                        break;
+                }
+                case I: {
+                        auto image = std::get<1>(queue3->get());
+                        queue4->put(IFFT(image), last);
+                } break;
                 case P:
+                        print(std::get<1>(queue4->get()));
                         break;
                 }
         }
 }
-
 
 int main(int argc, char* argv[]){
         if(argc != 2) {
@@ -158,25 +162,85 @@ int main(int argc, char* argv[]){
         }
         const long nitems = std::stol(argv[1]);
 
-        //locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> *queue1;// = new locked_buffer(nitems);
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1;
-        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue2;
-        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue3;
+        locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2;
+        locked_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3;
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4;
-
-        //auto queue1 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> (nitems);
 
         std::thread threads[5];
 
         threads[0] = std::thread(looper, 0, nitems, queue1, queue2, queue3, queue4);
-        // threads[1] = std::thread(FFT, queue1, queue2);
-        // threads[2] = std::thread(Blur, queue2, queue3);
-        // threads[3] = std::thread(IFFT, queue3, queue4);
-        // threads[4] = std::thread(print, queue4);
-        // auto imageSt1 = FFT(image);
-        // auto imageSt2 = Blur(imageSt1);
-        // auto imageSt3 = IFFT(imageSt2);
-        // print(imageSt3);
+        threads[1] = std::thread(looper, 1, nitems, queue1, queue2, queue3, queue4);
+        threads[2] = std::thread(looper, 2, nitems, queue1, queue2, queue3, queue4);
+        threads[3] = std::thread(looper, 3, nitems, queue1, queue2, queue3, queue4);
+        threads[4] = std::thread(looper, 4, nitems, queue1, queue2, queue3, queue4);
+
+        for(auto& th : threads) th.join();
 
         return 0;
 }
+
+// void looper(int mode, int nitems, locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1,
+//             locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2,
+//             locked_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3,
+//             locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 ){
+//         enum exec { M, F, B, I, P };
+//
+//         for(int i = 0; i<nitems; i++) {
+//                 double MaxRe = 0.1 + i *0.1;
+//                 double MinRe = -2.0 - i *0.1;
+//                 double MinIm = -1.2 - i *0.1;
+//                 bool last = (i==nitems-1);
+//                 //queue->put(mandelbrot(MaxRe, MinRe, MinIm, i), true);  // no se si true o false
+//                 switch (mode) {
+//                 case M: {
+//                         auto image = std::get<1>(queue1->get());
+//                         queue2->put(mandelbrot(MaxRe, MinRe, MinIm, i);
+//                         }
+//                         break;
+//                 case F:
+//                         FFT(std::get<1>(queue1->get()));
+//                         break;
+//                 case B:
+//                         Blur(std::get<1>(queue2->get()));
+//                         break;
+//                 case I:
+//                         IFFT(std::get<1>(queue3->get()));
+//                         break;
+//                 case P:
+//                         break;
+//                 }
+//         }
+// }
+//
+//
+// int main(int argc, char* argv[]){
+//         if(argc != 2) {
+//                 std::cerr<<"Wrong arguments"<<std::endl;
+//                 std::cerr<<"Valid formats: "<<std::endl;
+//                 std::cerr<< " " << argv[0] << "nitems" << std::endl;
+//         }
+//         const long nitems = std::stol(argv[1]);
+//
+//         //locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> *queue1;// = new locked_buffer(nitems);
+//         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1;
+//         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue2;
+//         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue3;
+//         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4;
+//
+//         //auto queue1 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> (nitems);
+//
+//         std::thread threads[5];
+//
+//         threads[0] = std::thread(looper, 0, nitems, queue1, queue2, queue3, queue4);
+//         // threads[1] = std::thread(FFT, queue1, queue2);
+//         // threads[2] = std::thread(Blur, queue2, queue3);
+//         // threads[3] = std::thread(IFFT, queue3, queue4);
+//         // threads[4] = std::thread(print, queue4);
+//         // auto imageSt1 = FFT(image);
+//         // auto imageSt2 = Blur(imageSt1);
+//         // auto imageSt3 = IFFT(imageSt2);
+//         // print(imageSt3);
+//
+//         return 0;
+// }

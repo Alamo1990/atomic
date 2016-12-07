@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/blayhem/Github/atomic/apps/lock_app_adv.cpp" "/home/blayhem/Github/atomic/build/apps/CMakeFiles/lock_adv.dir/lock_app_adv.cpp.o"
+  "/home/alamo/Documents/arquitecturaComputadors/atomic/apps/lock_app_adv.cpp" "/home/alamo/Documents/arquitecturaComputadors/atomic/build/apps/CMakeFiles/lock_adv.dir/lock_app_adv.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

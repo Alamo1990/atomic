@@ -6,9 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/home/blayhem/Github/atomic/apps/lock_app_base.cpp
+/home/alamo/Documents/arquitecturaComputadors/atomic/apps/lock_app_base.cpp
 ../include/locked_buffer.h
-/home/blayhem/Github/atomic/include/locked_buffer.h
+/home/alamo/Documents/arquitecturaComputadors/atomic/include/locked_buffer.h
 thread
 -
 iostream
@@ -26,7 +26,7 @@ utility
 fstream
 -
 
-/home/blayhem/Github/atomic/include/locked_buffer.h
+/home/alamo/Documents/arquitecturaComputadors/atomic/include/locked_buffer.h
 memory
 -
 mutex

@@ -7,17 +7,10 @@
 #include <iomanip>
 #include <utility>
 #include <fstream>
-#include <atomic>
 
 #define NTHREADS 4
 constexpr int ImageHeight = 36;
 constexpr int ImageWidth = 36;
-
-std::atomic<int> flag1(0);
-std::atomic<int> flag2(0);
-std::atomic<int> flag3(0);
-std::atomic<int> flag4(0);
-
 
 std::pair<int,std::vector<std::vector<unsigned char> > > mandelbrot(double MaxRe, double MinRe, double MinIm, int order){
         std::vector<std::vector<unsigned char> > image(ImageHeight, std::vector<unsigned char>(ImageWidth,0));
@@ -181,6 +174,7 @@ int main(int argc, char* argv[]){
         threads[3] = std::thread(looper, 3, nitems, queue1, queue2, queue3, queue4);
         threads[4] = std::thread(looper, 4, nitems, queue1, queue2, queue3, queue4);
 
+        for(auto& th : threads) th.join();
 
         return 0;
 }
