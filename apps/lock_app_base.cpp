@@ -116,12 +116,29 @@ void print(std::pair<int, std::vector<std::vector<unsigned char> > > image){
         file.close();
 }
 
-void looper(int nitems, locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1){
+void looper(int mode, int nitems, locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue){
+        enum exec { M, F, B, I, P };
+
         for(int i = 0; i<nitems; i++) {
                 double MaxRe = 0.1 + i *0.1;
                 double MinRe = -2.0 - i *0.1;
                 double MinIm = -1.2 - i *0.1;
-                queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), true);  // no se si true o false
+                //queue->put(mandelbrot(MaxRe, MinRe, MinIm, i), true);  // no se si true o false
+                switch (mode) {
+                case M:
+                        mandelbrot(MaxRe, MinRe, MinIm, i);
+                        break;
+                case F:
+                        FFT((i, queue));
+                        break;
+                case B:
+                        Blur(queue);
+                        break;
+                case I:
+                        IFFT()
+                        break;
+                case P:                 break;
+                }
         }
 }
 
@@ -135,19 +152,26 @@ int main(int argc, char* argv[]){
         const long nitems = std::stol(argv[1]);
 
         //locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> *queue1;// = new locked_buffer(nitems);
+        << << <<< HEAD
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1;
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue2;
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue3;
         locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4;
+        =======
+                locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1;
+        // locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>>* queue2;
+        // locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>>* queue3;
+        // locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>>* queue4;
+        >> >> >>> f31354441d2ab8fdad32483b41ad81c0cfed8c23
         //auto queue1 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char>>>> (nitems);
 
         std::thread threads[5];
 
         threads[0] = std::thread(mandelbrotLoop, nitems, queue1);
-        threads[1] = std::thread(FFT, queue1, queue2);
-        threads[2] = std::thread(Blur, queue2, queue3);
-        threads[3] = std::thread(IFFT, queue3, queue4);
-        threads[4] = std::thread(print, queue4);
+        // threads[1] = std::thread(FFT, queue1, queue2);
+        // threads[2] = std::thread(Blur, queue2, queue3);
+        // threads[3] = std::thread(IFFT, queue3, queue4);
+        // threads[4] = std::thread(print, queue4);
         // auto imageSt1 = FFT(image);
         // auto imageSt2 = Blur(imageSt1);
         // auto imageSt3 = IFFT(imageSt2);

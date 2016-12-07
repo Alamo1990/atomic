@@ -116,12 +116,33 @@ void print(std::pair<int, std::vector<std::vector<unsigned char> > > image){
         file.close();
 }
 
-void looper(int funct, int nitems, std::vector< std::unique_ptr< atomic_buffer<int> > >  queues){
+
+void looper(int mode, int nitems, atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1,
+            atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2,
+            atomic_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3,
+            atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 ){
+        enum exec { M, F, B, I, P };
+
         for(int i = 0; i<nitems; i++) {
                 double MaxRe = 0.1 + i *0.1;
                 double MinRe = -2.0 - i *0.1;
                 double MinIm = -1.2 - i *0.1;
-                queues[0]->put(mandelbrot(MaxRe, MinRe, MinIm, i), true);   // no se si true o false
+                //queue->put(mandelbrot(MaxRe, MinRe, MinIm, i), true);  // no se si true o false
+                switch (mode) {
+                case M:
+                        mandelbrot(MaxRe, MinRe, MinIm, i);
+                        break;
+                case F:
+                        FFT((i, queue));
+                        break;
+                case B:
+                        Blur(queue);
+                        break;
+                case I:
+                        IFFT()
+                        break;
+                case P:                 break;
+                }
         }
 }
 
@@ -133,16 +154,18 @@ int main(int argc, char* argv[]){
         }
         const long nitems = std::stol(argv[1]);
 
-        std::vector< std::unique_ptr< std::pair<int,std::vector<std::vector<unsigned char> > > >  >  queues;
-        queues.push_back( std::unique_ptr< atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > > > (new atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(nitems)));
+        atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1;
+        atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2;
+        atomic_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3;
+        atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4;
 
         std::thread threads[5];
 
-        threads[0] = std::thread(looper, 0, nitems, queues);
-        threads[1] = std::thread(looper, 1, nitems, queues);
-        threads[2] = std::thread(looper, 2, nitems, queues);
-        threads[3] = std::thread(looper, 3, nitems, queues);
-        threads[4] = std::thread(looper, 4, nitems, queues);
+        threads[0] = std::thread(looper, 0, nitems, queue1, queue2, queue3, queue4);
+        threads[1] = std::thread(looper, 1, nitems, queue1, queue2, queue3, queue4);
+        threads[2] = std::thread(looper, 2, nitems, queue1, queue2, queue3, queue4);
+        threads[3] = std::thread(looper, 3, nitems, queue1, queue2, queue3, queue4);
+        threads[4] = std::thread(looper, 4, nitems, queue1, queue2, queue3, queue4);
 
         // for(int i = 0; i<nitems;i++){
         //     double MaxRe = 0.1 + i *0.1;
