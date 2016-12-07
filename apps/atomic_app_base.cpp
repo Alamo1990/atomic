@@ -166,7 +166,7 @@ int main(int argc, char* argv[]){
         atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2 = new atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >(buff_size);
         atomic_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3 = new atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >(buff_size);
         atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 = new atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size);
-//
+
         std::thread threads[5];
         std::cout << "3" << std::endl;
         threads[0] = std::thread(looper, 0, nitems, queue1, queue2, queue3, queue4);
