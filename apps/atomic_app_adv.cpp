@@ -126,9 +126,9 @@ void scheduler(int nthreads, int nitems, atomic_buffer<std::pair<int,std::vector
 }
 
 void looper(int mode, int nitems, atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue0,
-            std::unique_ptr<atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > > > queue1,
-            std::unique_ptr< atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > > > queue2,
-            std::unique_ptr< atomic_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > > > queue3,
+            std::unique_ptr<atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > > >& queue1,
+            std::unique_ptr< atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > > >& queue2,
+            std::unique_ptr< atomic_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > > >& queue3,
             atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 ){
         enum exec { M, F, B, I, P };
         bool last = false;
@@ -189,7 +189,7 @@ int main(int argc, char* argv[]){
 
         std::vector<std::thread> threads(2+nthreads*3+1);
 
-        threads.at(0) = std::thread(looper, 0, nitems, queue0,  queues1[0], queues2[0], queues3[0], queue4);
+        threads.at(0) = std::thread(looper, 0, nitems, queue0, queues1[0], queues2[0], queues3[0], queue4);
         threads.at(1) = std::thread(nthreads, nitems, scheduler, queue0, queues1);
         for (int i = 0; i < nthreads; i++) {
                 threads.at(3+i*3) = std::thread(looper, 1, nitems, queue0, queues1[i], queues2[i], queues3[i], queue4);
