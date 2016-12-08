@@ -1,1 +1,1 @@
-/usr/bin/c++   -std=c++11 -Wall -Wextra -Wno-deprecated -Werror -pedantic -pedantic-errors -pthread   CMakeFiles/atomic_test.dir/atomic_app_base.cpp.o  -o ../atomic_test -rdynamic 
+/usr/local/bin/g++-6   -std=c++11 -Wall -Wextra -Wno-deprecated -Werror -pedantic -pedantic-errors -pthread -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/atomic_test.dir/atomic_app_base.cpp.o  -o ../atomic_test  
