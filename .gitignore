@@ -28,6 +28,6 @@
 *.out
 *.app
 
-build
+build/
 build/*
 apps/CMakeFiles/*
