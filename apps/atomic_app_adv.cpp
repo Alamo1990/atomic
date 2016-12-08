@@ -7,11 +7,13 @@
 #include <iomanip>
 #include <utility>
 #include <fstream>
+#include <atomic>
 
 #define NTHREADS 4
+using namespace std;
 constexpr int ImageHeight = 36;
 constexpr int ImageWidth = 36;
-using namespace std;
+atomic_flag atomFlag = ATOMIC_FLAG_INIT;
 
 std::pair<int,std::vector<std::vector<unsigned char> > > mandelbrot(double MaxRe, double MinRe, double MinIm, int order){
         std::vector<std::vector<unsigned char> > image(ImageHeight, std::vector<unsigned char>(ImageWidth,0));
@@ -160,7 +162,9 @@ void looper(int mode,
                         queue4->put(IFFT(image), last);
                 } break;
                 case P:
+                        while(atomFlag.test_and_set());
                         print(std::get<1>(queue4->get()));
+                        atomFlag.clear();
                         break;
                 }
         }
@@ -201,7 +205,7 @@ int main(int argc, char* argv[]){
                 threads.at(4+i*3) = std::thread(looper, 2, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
                 threads.at(5+i*3) = std::thread(looper, 3, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
         }
-        threads.at(2+nthreads*3+1) = std::thread(looper, 4,nitems, queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4);
+        threads.at(2+nthreads*3) = std::thread(looper, 4,nitems, queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4);
 
         for(auto& th : threads) th.join();
 
