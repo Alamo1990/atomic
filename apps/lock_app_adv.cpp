@@ -12,6 +12,7 @@
 constexpr int ImageHeight = 36;
 constexpr int ImageWidth = 36;
 
+std::mutex mtx;
 
 std::pair<int,std::vector<std::vector<unsigned char> > > mandelbrot(double MaxRe, double MinRe, double MinIm, int order){
         std::vector<std::vector<unsigned char> > image(ImageHeight, std::vector<unsigned char>(ImageWidth,0));
@@ -118,9 +119,13 @@ void print(std::pair<int, std::vector<std::vector<unsigned char> > > image){
 
 void scheduler(int nthreads, int nitems, locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue0,
                std::vector< std::unique_ptr< locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > > > > & queues1){
+        std::cout << "schestart" << std::endl;
         for (int i = 0; i < nitems; i++) {
+                std::cout << "schloopin: "<<i << std::endl;
                 int turn = i%nthreads;
+                std::cout << "schget: "<< i << std::endl;
                 auto image = std::get<1>(queue0->get());
+                std::cout << "schpreput: "<< i << std::endl;
                 queues1[turn]->put(image, i==(nitems-1));
         }
 }
@@ -143,25 +148,38 @@ void looper(int mode,
 
                 switch (mode) {
                 case M:
+                        std::cout << "prebrot" << std::endl;
                         queue0->put(mandelbrot(MaxRe, MinRe, MinIm, i), last); // no se si true o false
+                        std::cout << "postbrot" << std::endl;
                         break;
                 case F: {
+                        std::cout << "getFFT" << std::endl;
                         auto image = std::get<1>(queue1->get());
+                        std::cout << "preFFT" << std::endl;
                         queue2->put(FFT(image), last);
+                        std::cout << "postFFT" << std::endl;
                 }
                 break;
                 case B: {
                         auto image = std::get<1>(queue2->get());
+                        std::cout << "preblur" << std::endl;
                         queue3->put(Blur(image), last);
+                        std::cout << "postblur" << std::endl;
                         break;
                 }
                 case I: {
                         auto image = std::get<1>(queue3->get());
+                        std::cout << "preinv" << std::endl;
                         queue4->put(IFFT(image), last);
+                        std::cout << "postinv" << std::endl;
                 } break;
-                case P:
-                        print(std::get<1>(queue4->get()));
+                case P: {
+                        mtx.lock();
+                        auto image = std::get<1>(queue4->get());
+                        mtx.unlock();
+                        print(image);
                         break;
+                }
                 }
         }
 }
@@ -192,13 +210,20 @@ int main(int argc, char* argv[]){
         std::vector<std::thread> threads(2+nthreads*3+1);
 
         threads.at(0) = std::thread(looper, 0, nitems, queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4);
+        std::cout << "0" << std::endl;
         threads.at(1) = std::thread(scheduler, nthreads, nitems, queue0, ref(queues1));
+        std::cout << "1" << std::endl;
         for (int i = 0; i < nthreads; i++) {
+                std::cout << "loopstart: "<< i << std::endl;
                 threads.at(3+i*3) = std::thread(looper, 1, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
+                std::cout << "2: "<< i << std::endl;
                 threads.at(4+i*3) = std::thread(looper, 2, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
+                std::cout << "3: "<<i << std::endl;
                 threads.at(5+i*3) = std::thread(looper, 3, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
+                std::cout << "4:"<< i << std::endl;
         }
         threads.at(2+nthreads*3) = std::thread(looper, 4,nitems, queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4);
+        std::cout << "5" << std::endl;
 
         for(auto& th : threads) th.join();
 
