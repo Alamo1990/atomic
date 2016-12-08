@@ -117,7 +117,7 @@ void print(std::pair<int, std::vector<std::vector<unsigned char> > > image){
 }
 
 void scheduler(int nthreads, int nitems, atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue0,
-               std::vector< std::unique_ptr< atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > > > >  queues1){
+               std::vector< std::unique_ptr< atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > > > >&  queues1){
         for (int i = 0; i < nitems; i++) {
                 int turn = i%nthreads;
                 auto image = std::get<1>(queue0->get());
@@ -195,15 +195,15 @@ int main(int argc, char* argv[]){
         threads.at(0) = std::thread(looper, 0, nitems,
           queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4
         );
-        /*threads.at(1) = std::thread(nthreads, nitems, scheduler, ref(queue0), ref(queues1));
+        threads.at(1) = std::thread(scheduler, nthreads, nitems, queue0, ref(queues1));
         for (int i = 0; i < nthreads; i++) {
-                threads.at(3+i*3) = std::thread(looper, 1, nitems, queue0, queues1[i], queues2[i], queues3[i], queue4);
-                threads.at(4+i*3) = std::thread(looper, 2, nitems, queue0, queues1[i], queues2[i], queues3[i], queue4);
-                threads.at(5+i*3) = std::thread(looper, 3, nitems, queue0, queues1[i], queues2[i], queues3[i], queue4);
+                threads.at(3+i*3) = std::thread(looper, 1, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
+                threads.at(4+i*3) = std::thread(looper, 2, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
+                threads.at(5+i*3) = std::thread(looper, 3, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
         }
-        threads.at(2+nthreads*3+1) = std::thread(looper, 4, nitems, queues1[0], queues2[0], queues3[0], queue4);
+        threads.at(2+nthreads*3+1) = std::thread(looper, 4,nitems, queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4);
 
         for(auto& th : threads) th.join();
-        */
+
         return 0;
 }
