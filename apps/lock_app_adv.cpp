@@ -165,27 +165,42 @@ void looper(int mode,
                 }
         }
 }
-
 int main(int argc, char* argv[]){
-        if(argc != 2) {
+        if(argc != 4) {
                 std::cerr<<"Wrong arguments"<<std::endl;
                 std::cerr<<"Valid formats: "<<std::endl;
                 std::cerr<< " " << argv[0] << "nitems" << std::endl;
         }
         const long nitems = std::stol(argv[1]);
+        const int buff_size = std::stoi(argv[2]);
+        const int nthreads = std::stoi(argv[3]);
 
-        for(int i = 0; i<nitems; i++) {
-                double MaxRe = 0.1 + i *0.1;
-                double MinRe = -2.0 - i *0.1;
-                double MinIm = -1.2 - i *0.1;
-                auto image = mandelbrot(MaxRe, MinRe, MinIm, i);
-                auto imageSt1 = FFT(image);
-                auto imageSt2 = Blur(imageSt1);
-                auto imageSt3 = IFFT(imageSt2);
-                print(imageSt3);
+
+        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue0 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size);
+
+        std::vector< std::unique_ptr< locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > > > >  queues1;
+        std::vector< std::unique_ptr< locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > > > >  queues2;
+        std::vector< std::unique_ptr< locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > > > >  queues3;
+        for(int i=0; i<nthreads; i++) {
+                queues1.push_back( std::unique_ptr< locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > > > (new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size)));
+                queues2.push_back( std::unique_ptr< locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > > > (new locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >(buff_size)));
+                queues3.push_back( std::unique_ptr< locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > > > (new locked_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >(buff_size)));
         }
+        locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 = new locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size);
 
 
+        std::vector<std::thread> threads(2+nthreads*3+1);
+
+        threads.at(0) = std::thread(looper, 0, nitems, queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4);
+        threads.at(1) = std::thread(scheduler, nthreads, nitems, queue0, ref(queues1));
+        for (int i = 0; i < nthreads; i++) {
+                threads.at(3+i*3) = std::thread(looper, 1, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
+                threads.at(4+i*3) = std::thread(looper, 2, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
+                threads.at(5+i*3) = std::thread(looper, 3, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
+        }
+        threads.at(2+nthreads*3) = std::thread(looper, 4,nitems, queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4);
+
+        for(auto& th : threads) th.join();
 
         return 0;
 }

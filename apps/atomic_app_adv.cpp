@@ -192,15 +192,20 @@ int main(int argc, char* argv[]){
 
         std::vector<std::thread> threads(2+nthreads*3+1);
 
-
         threads.at(0) = std::thread(looper, 0, nitems, queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4);
-        threads.at(1) = std::thread(scheduler, nthreads, nitems, ref(queue0), ref(queues1));
+        std::cout << "aquiii1" << std::endl;
+        threads.at(1) = std::thread(scheduler, nthreads, nitems, queue0, ref(queues1));
+        std::cout << "aquiii2" << std::endl;
         for (int i = 0; i < nthreads; i++) {
-                threads.at(3+i*3) = std::thread(looper, 1, nitems, queue0, queues1[i], queues2[i], queues3[i], queue4);
-                threads.at(4+i*3) = std::thread(looper, 2, nitems, queue0, queues1[i], queues2[i], queues3[i], queue4);
-                threads.at(5+i*3) = std::thread(looper, 3, nitems, queue0, queues1[i], queues2[i], queues3[i], queue4);
+                threads.at(3+i*3) = std::thread(looper, 1, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
+                std::cout << "aquiii3" << std::endl;
+                threads.at(4+i*3) = std::thread(looper, 2, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
+                std::cout << "aquiii4" << std::endl;
+                threads.at(5+i*3) = std::thread(looper, 3, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
+                std::cout << "aquiii5" << std::endl;
         }
-        threads.at(2+nthreads*3+1) = std::thread(looper, 4, nitems, queues1[0], queues2[0], queues3[0], queue4);
+        threads.at(2+nthreads*3) = std::thread(looper, 4,nitems, queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4);
+        std::cout << "aquiii6" << std::endl;
 
         for(auto& th : threads) th.join();
 
