@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11 -Wall -Wextra -Wno-deprecated -Werror -pedantic -pedantic-errors -pthread   CMakeFiles/seq_test.dir/seq_app.cpp.o  -o ../seq_test -rdynamic 
