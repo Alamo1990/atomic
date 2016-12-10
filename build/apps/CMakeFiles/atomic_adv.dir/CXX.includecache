@@ -25,6 +25,8 @@ utility
 -
 fstream
 -
+atomic
+-
 
 /home/alamo/Documents/arquitecturaComputadors/atomic/include/atomic_buffer.h
 memory

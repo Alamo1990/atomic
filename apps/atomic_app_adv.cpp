@@ -162,7 +162,7 @@ void looper(int mode,
                         queue4->put(IFFT(image), last);
                 } break;
                 case P:
-                        while(atomFlag.test_and_set());
+                        while(atomFlag.test_and_set()) ;
                         print(std::get<1>(queue4->get()));
                         atomFlag.clear();
                         break;
@@ -194,25 +194,31 @@ int main(int argc, char* argv[]){
         atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 = new atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size);
 
 
-        std::vector<std::thread> threads(2+nthreads*3+1);
+        std::vector<std::thread> threads(3+nthreads*3);
 
-        threads.at(0) = std::thread(looper, 0, nitems, queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4);
-        std::cout << "aquiii1" << std::endl;
-        threads.at(1) = std::thread(scheduler, nthreads, nitems, queue0, ref(queues1));
-        std::cout << "aquiii2" << std::endl;
+        threads.at(0) = std::thread(looper, 0, nitems, queue0, std::ref(queues1[0]), std::ref(queues2[0]), std::ref(queues3[0]), queue4);
+        std::cout << "0" << std::endl;
+        threads.at(1) = std::thread(scheduler, nthreads, nitems, queue0, std::ref(queues1));
+        std::cout << "1" << std::endl;
         for (int i = 0; i < nthreads; i++) {
-                threads.at(3+i*3) = std::thread(looper, 1, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
-                std::cout << "aquiii3" << std::endl;
-                threads.at(4+i*3) = std::thread(looper, 2, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
-                std::cout << "aquiii4" << std::endl;
-                threads.at(5+i*3) = std::thread(looper, 3, nitems, queue0, ref(queues1[i]), ref(queues2[i]), ref(queues3[i]), queue4);
-                std::cout << "aquiii5" << std::endl;
+                std::cout << "loopstart: "<< i << std::endl;
+                threads.at(3+i*3) = std::thread(looper, 1, nitems, queue0, std::ref(queues1[i]), std::ref(queues2[i]), std::ref(queues3[i]), queue4);
+                std::cout << "2: "<< i << std::endl;
+                threads.at(4+i*3) = std::thread(looper, 2, nitems, queue0, std::ref(queues1[i]), std::ref(queues2[i]), std::ref(queues3[i]), queue4);
+                std::cout << "3: "<<i << std::endl;
+                threads.at(5+i*3) = std::thread(looper, 3, nitems, queue0, std::ref(queues1[i]), std::ref(queues2[i]), std::ref(queues3[i]), queue4);
+                std::cout << "4:"<< i << std::endl;
+                threads.at(3+i*3).join();
+                threads.at(4+i*3).join();
+                threads.at(5+i*3).join();
         }
-        threads.at(2+nthreads*3) = std::thread(looper, 4,nitems, queue0, ref(queues1[0]), ref(queues2[0]), ref(queues3[0]), queue4);
+        std::cout << "4,5" << std::endl;
+        threads.at(2+nthreads*3) = std::thread(looper, 4, nitems, queue0, std::ref(queues1[0]), std::ref(queues2[0]), std::ref(queues3[0]), queue4);
+        std::cout << "5" << std::endl;
 
-        std::cout << "aquiii6" << std::endl;
-
-        for(auto& th : threads) th.join();
+        threads.at(0).join();
+        threads.at(1).join();
+        threads.at(2+nthreads*3).join();
 
         return 0;
 }
