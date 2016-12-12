@@ -225,9 +225,9 @@ int main(int argc, char* argv[]){
                 std::cout << "3: "<<i << std::endl;
                 threads.at(5+i*3) = std::thread(looper, 3, nitems, queue0, std::ref(queues1[i]), std::ref(queues2[i]), std::ref(queues3[i]), queue4);
                 std::cout << "4:"<< i << std::endl;
-                threads.at(3+i*3).join();
-                threads.at(4+i*3).join();
-                threads.at(5+i*3).join();
+                threads.at(3+i*3).detach();
+                threads.at(4+i*3).detach();
+                threads.at(5+i*3).detach();
         }
         std::cout << "4,5" << std::endl;
         threads.at(2+nthreads*3) = std::thread(looper, 4, nitems, queue0, std::ref(queues1[0]), std::ref(queues2[0]), std::ref(queues3[0]), queue4);
