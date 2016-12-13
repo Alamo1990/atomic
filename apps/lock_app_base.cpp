@@ -124,34 +124,54 @@ void looper(int mode, int nitems, locked_buffer<pair<int,vector<vector<unsigned 
             locked_buffer<pair<int,vector<vector<unsigned char> > > >* queue4 ){
         enum exec { M, F, B, I, P };
         bool last = false;
-        for(int i = 0; i<nitems; i++) {
-                double MaxRe = 0.1 + i *0.1;
-                double MinRe = -2.0 - i *0.1;
-                double MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
 
-                switch (mode) {
-                case M:
-                        queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), last); // no se si true o false
-                        break;
-                case F: {
-                        auto image = get<1>(queue1->get());
-                        queue2->put(FFT(image), last);
-                }
-                break;
-                case B: {
-                        auto image = get<1>(queue2->get());
-                        queue3->put(Blur(image), last);
-                        break;
-                }
-                case I: {
-                        auto image = get<1>(queue3->get());
-                        queue4->put(IFFT(image), last);
-                } break;
-                case P:
-                        print(get<1>(queue4->get()));
-                        break;
-                }
+        double MaxRe;
+        double MinRe;
+        double MinIm;
+
+        switch (mode) {
+        case M:
+            for(int i = 0; i<nitems; i++) {
+                MaxRe = 0.1 + i *0.1;
+                MinRe = -2.0 - i *0.1;
+                MinIm = -1.2 - i *0.1;
+                if(i == (nitems-1)) last=true;
+                queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), last);
+            } break;
+        case F:
+          for(int i = 0; i<nitems; i++) {
+              MaxRe = 0.1 + i *0.1;
+              MinRe = -2.0 - i *0.1;
+              MinIm = -1.2 - i *0.1;
+              if(i == (nitems-1)) last=true;
+              auto image = get<1>(queue1->get());
+              queue2->put(FFT(image), last);
+          } break;
+        case B:
+            for(int i = 0; i<nitems; i++) {
+                MaxRe = 0.1 + i *0.1;
+                MinRe = -2.0 - i *0.1;
+                MinIm = -1.2 - i *0.1;
+                if(i == (nitems-1)) last=true;
+                auto image = get<1>(queue2->get());
+                queue3->put(Blur(image), last);
+            } break;
+        case I:
+            for(int i = 0; i<nitems; i++) {
+                MaxRe = 0.1 + i *0.1;
+                MinRe = -2.0 - i *0.1;
+                MinIm = -1.2 - i *0.1;
+                if(i == (nitems-1)) last=true;
+                auto image = get<1>(queue3->get());
+                queue4->put(IFFT(image), last);
+            } break;
+        case P:
+            for(int i = 0; i<nitems; i++) {
+                MaxRe = 0.1 + i *0.1;
+                MinRe = -2.0 - i *0.1;
+                MinIm = -1.2 - i *0.1;
+                print(get<1>(queue4->get()));
+            } break;
         }
 }
 

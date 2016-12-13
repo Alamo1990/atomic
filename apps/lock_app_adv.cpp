@@ -144,50 +144,76 @@ void looper(int mode,
         std::cout << "inThread mode: "<<mode << std::endl;
         enum exec { M, F, B, I, P };
         bool last = false;
-        for(int i = 0; i<nitems; i++) {
-                double MaxRe = 0.1 + i *0.1;
-                double MinRe = -2.0 - i *0.1;
-                double MinIm = -1.2 - i *0.1;
+
+        double MaxRe;
+        double MinRe;
+        double MinIm;
+
+        switch (mode) {
+        case M:
+            for(int i = 0; i<nitems; i++) {
+                MaxRe = 0.1 + i *0.1;
+                MinRe = -2.0 - i *0.1;
+                MinIm = -1.2 - i *0.1;
                 if(i == (nitems-1)) last=true;
 
-                switch (mode) {
-                case M:
-                        std::cout << "prebrot: "<< i  << std::endl;
-                        queue0->put(mandelbrot(MaxRe, MinRe, MinIm, i), last);         // no se si true o false
-                        std::cout << "postbrot: "<< i << std::endl;
-                        break;
-                case F: {
-                        std::cout << "getFFT: "<< i << std::endl;
-                        auto image = std::get<1>(queue1->get());
-                        std::cout << "preFFT: "<< i << std::endl;
-                        queue2->put(FFT(image), last);
-                        std::cout << "postFFT: "<< i << std::endl;
-                }
-                break;
-                case B: {
-                        auto image = std::get<1>(queue2->get());
-                        std::cout << "preblur: "<< i << std::endl;
-                        queue3->put(Blur(image), last);
-                        std::cout << "postblur: "<< i << std::endl;
-                        break;
-                }
-                case I: {
-                        auto image = std::get<1>(queue3->get());
-                        std::cout << "preinv: "<< i  << std::endl;
-                        queue4->put(IFFT(image), last);
-                        std::cout << "postinv: "<< i  << std::endl;
-                } break;
-                case P: {
-                        std::cout << "printpreget: "<< i  << std::endl;
-                        auto image = std::get<1>(queue4->get());
-                        std::cout << "itermediateprint: "<< i  << std::endl;
-                        print(image);
-                        std::cout << "postprint: "<< i  << std::endl;
-                        break;
-                }
-                }
+                std::cout << "prebrot: "<< i  << std::endl;
+                queue0->put(mandelbrot(MaxRe, MinRe, MinIm, i), last);
+                std::cout << "postbrot: "<< i << std::endl;
+            } break;
+        case F:
+            for(int i = 0; i<nitems; i++) {
+                MaxRe = 0.1 + i *0.1;
+                MinRe = -2.0 - i *0.1;
+                MinIm = -1.2 - i *0.1;
+                if(i == (nitems-1)) last=true;
+
+                std::cout << "getFFT: "<< i << std::endl;
+                auto image = std::get<1>(queue1->get());
+                std::cout << "preFFT: "<< i << std::endl;
+                queue2->put(FFT(image), last);
+                std::cout << "postFFT: "<< i << std::endl;
+            } break;
+        case B:
+            for(int i = 0; i<nitems; i++) {
+                MaxRe = 0.1 + i *0.1;
+                MinRe = -2.0 - i *0.1;
+                MinIm = -1.2 - i *0.1;
+                if(i == (nitems-1)) last=true;
+
+                auto image = std::get<1>(queue2->get());
+                std::cout << "preblur: "<< i << std::endl;
+                queue3->put(Blur(image), last);
+                std::cout << "postblur: "<< i << std::endl;
+            } break;
+        case I:
+            for(int i = 0; i<nitems; i++) {
+                MaxRe = 0.1 + i *0.1;
+                MinRe = -2.0 - i *0.1;
+                MinIm = -1.2 - i *0.1;
+                if(i == (nitems-1)) last=true;
+
+                auto image = std::get<1>(queue3->get());
+                std::cout << "preinv: "<< i  << std::endl;
+                queue4->put(IFFT(image), last);
+                std::cout << "postinv: "<< i  << std::endl;
+            } break;
+        case P:
+            for(int i = 0; i<nitems; i++) {
+                MaxRe = 0.1 + i *0.1;
+                MinRe = -2.0 - i *0.1;
+                MinIm = -1.2 - i *0.1;
+                if(i == (nitems-1)) last=true;
+
+                std::cout << "printpreget: "<< i  << std::endl;
+                auto image = std::get<1>(queue4->get());
+                std::cout << "itermediateprint: "<< i  << std::endl;
+                print(image);
+                std::cout << "postprint: "<< i  << std::endl;
+            } break;
         }
 }
+
 int main(int argc, char* argv[]){
         if(argc != 4) {
                 cerr<<"Wrong arguments"<<endl;
