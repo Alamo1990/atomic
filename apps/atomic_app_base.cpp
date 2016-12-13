@@ -156,7 +156,7 @@ void looper(int mode, int nitems, atomic_buffer<std::pair<int,std::vector<std::v
 
                 auto image = std::get<1>(queue2->get());
                 queue3->put(Blur(image), last);
-            } break
+            } break;
         case I:
             for(int i = 0; i<nitems; i++) {
                 MaxRe = 0.1 + i *0.1;
