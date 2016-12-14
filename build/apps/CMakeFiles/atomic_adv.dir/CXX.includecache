@@ -27,6 +27,8 @@ fstream
 -
 atomic
 -
+algorithm
+-
 
 /home/alamo/Documents/arquitecturaComputadors/atomic/include/atomic_buffer.h
 memory
