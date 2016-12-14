@@ -199,11 +199,6 @@ int main(int argc, char* argv[]){
         const int buff_size = stoi(argv[2]);
         const int nthreads = stoi(argv[3]);
 
-        std::vector<int> assignations(nthreads, nitems/nthreads);
-        for(int i=0; i<(nitems%nthreads); i++)
-                assignations.at(i)++;
-
-
         locked_buffer<pair<int,vector<vector<unsigned char> > > >* queue0 = new locked_buffer<pair<int,vector<vector<unsigned char> > > >(buff_size);
 
         vector< unique_ptr< locked_buffer<pair<int,vector<vector<unsigned char> > > > > >  queues1;
