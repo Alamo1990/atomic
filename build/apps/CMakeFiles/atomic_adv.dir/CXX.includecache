@@ -6,9 +6,9 @@
 
 #IncludeRegexTransform: 
 
-/Users/blayhem/GitHub/CompArch/atomic/apps/atomic_app_adv.cpp
+/home/alamo/Documents/arquitecturaComputadors/atomic/apps/atomic_app_adv.cpp
 ../include/atomic_buffer.h
-/Users/blayhem/GitHub/CompArch/atomic/include/atomic_buffer.h
+/home/alamo/Documents/arquitecturaComputadors/atomic/include/atomic_buffer.h
 thread
 -
 iostream
@@ -28,7 +28,7 @@ fstream
 atomic
 -
 
-/Users/blayhem/GitHub/CompArch/atomic/include/atomic_buffer.h
+/home/alamo/Documents/arquitecturaComputadors/atomic/include/atomic_buffer.h
 memory
 -
 atomic

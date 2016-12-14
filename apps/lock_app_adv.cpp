@@ -120,28 +120,26 @@ void print(pair<int, vector<vector<unsigned char> > > image){
 
 void scheduler(int nthreads, int nitems, locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue0,
                std::vector< std::unique_ptr< locked_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > > > > & queues1){
-        std::cout << "schestart" << std::endl;
+        // std::cout << "schestart" << std::endl;
 
         for (int i = 0; i < nitems; i++) {
-                cout << "schloopin: "<<i << endl;
+                // cout << "schloopin: "<<i << endl;
                 int turn = i%nthreads;
-                cout << "schget: "<< i << endl;
+                // cout << "schget: "<< i << endl;
                 auto image = get<1>(queue0->get());
-                cout << "schpreput: "<< i << endl;
+                // cout << "schpreput: "<< i << endl;
                 queues1[turn]->put(image, i==(nitems-1));
         }
 
 }
 
-void looper(int mode,
-            int nitems,
+void looper(int mode, int nthreads, int thID, int nitems,
             locked_buffer<pair<int,vector<vector<unsigned char> > > >* queue0,
             unique_ptr<locked_buffer<pair<int,vector<vector<unsigned char> > > > >& queue1,
             unique_ptr< locked_buffer<pair<int,vector<vector<complex<double> > > > > >& queue2,
             unique_ptr< locked_buffer<pair<int, vector< vector< complex<double> > > > > >& queue3,
             locked_buffer<pair<int,vector<vector<unsigned char> > > >* queue4
             ){
-        std::cout << "inThread mode: "<<mode << std::endl;
         enum exec { M, F, B, I, P };
         bool last = false;
 
@@ -149,68 +147,61 @@ void looper(int mode,
         double MinRe;
         double MinIm;
 
+        int niterations = nitems/nthreads;
+        if(thID == (nthreads-1)) niterations += nitems%nthreads;
+
+        std::cout << "inThread -> mode: " << mode << " | thID: " << thID << " | niterations: " << niterations << std::endl;
+
         switch (mode) {
         case M:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
+                for(int i = 0; i<nitems; i++) {
+                        MaxRe = 0.1 + i *0.1;
+                        MinRe = -2.0 - i *0.1;
+                        MinIm = -1.2 - i *0.1;
+                        if(i == (nitems-1)) last=true;
 
-                std::cout << "prebrot: "<< i  << std::endl;
-                queue0->put(mandelbrot(MaxRe, MinRe, MinIm, i), last);
-                std::cout << "postbrot: "<< i << std::endl;
-            } break;
+                        // std::cout << "prebrot: "<< i  << std::endl;
+                        queue0->put(mandelbrot(MaxRe, MinRe, MinIm, i), last);
+                        // std::cout << "postbrot: "<< i << std::endl;
+                } break;
         case F:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
+                for(int i = 0; i<niterations; i++) {
+                        if(i == (niterations-1)) last=true;
 
-                std::cout << "getFFT: "<< i << std::endl;
-                auto image = std::get<1>(queue1->get());
-                std::cout << "preFFT: "<< i << std::endl;
-                queue2->put(FFT(image), last);
-                std::cout << "postFFT: "<< i << std::endl;
-            } break;
+                        // std::cout << "getFFT: "<< i << std::endl;
+                        auto image = std::get<1>(queue1->get());
+                        // std::cout << "preFFT: "<< i << std::endl;
+                        queue2->put(FFT(image), last);
+                        // std::cout << "postFFT: "<< i << std::endl;
+                } break;
         case B:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
+                for(int i = 0; i<niterations; i++) {
+                        if(i == (niterations-1)) last=true;
 
-                auto image = std::get<1>(queue2->get());
-                std::cout << "preblur: "<< i << std::endl;
-                queue3->put(Blur(image), last);
-                std::cout << "postblur: "<< i << std::endl;
-            } break;
+                        auto image = std::get<1>(queue2->get());
+                        // std::cout << "preblur: "<< i << std::endl;
+                        queue3->put(Blur(image), last);
+                        // std::cout << "postblur: "<< i << std::endl;
+                } break;
         case I:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
+                for(int i = 0; i<niterations; i++) {
+                        if(i == (niterations-1)) last=true;
 
-                auto image = std::get<1>(queue3->get());
-                std::cout << "preinv: "<< i  << std::endl;
-                queue4->put(IFFT(image), last);
-                std::cout << "postinv: "<< i  << std::endl;
-            } break;
+                        auto image = std::get<1>(queue3->get());
+                        // std::cout << "preinv: "<< i  << std::endl;
+                        queue4->put(IFFT(image), last);
+                        // std::cout << "postinv: "<< i  << std::endl;
+                } break;
         case P:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
+                for(int i = 0; i<nitems; i++) {
+                        if(i == (nitems-1)) last=true;
 
-                std::cout << "printpreget: "<< i  << std::endl;
-                auto image = std::get<1>(queue4->get());
-                std::cout << "itermediateprint: "<< i  << std::endl;
-                print(image);
-                std::cout << "postprint: "<< i  << std::endl;
-            } break;
+                        // std::cout << "printpreget: "<< i  << std::endl;
+                        auto image = std::get<1>(queue4->get());
+                        // std::cout << "itermediateprint: "<< i  << std::endl;
+                        print(image);
+                        // std::cout << "postprint: "<< i  << std::endl;
+                } break;
         }
 }
 
@@ -239,25 +230,25 @@ int main(int argc, char* argv[]){
 
         std::vector<std::thread> threads(3+nthreads*3);
 
-        threads.at(0) = std::thread(looper, 0, nitems, queue0, std::ref(queues1[0]), std::ref(queues2[0]), std::ref(queues3[0]), queue4);
-        std::cout << "0" << std::endl;
+        threads.at(0) = std::thread(looper, 0, nthreads, 0, nitems, queue0, std::ref(queues1[0]), std::ref(queues2[0]), std::ref(queues3[0]), queue4);
+        // std::cout << "0" << std::endl;
         threads.at(1) = std::thread(scheduler, nthreads, nitems, queue0, std::ref(queues1));
-        std::cout << "1" << std::endl;
+        // std::cout << "1" << std::endl;
         for (int i = 0; i < nthreads; i++) {
-                std::cout << "loopstart: "<< i << std::endl;
-                threads.at(3+i*3) = std::thread(looper, 1, nitems, queue0, std::ref(queues1[i]), std::ref(queues2[i]), std::ref(queues3[i]), queue4);
-                std::cout << "2: "<< i << std::endl;
-                threads.at(4+i*3) = std::thread(looper, 2, nitems, queue0, std::ref(queues1[i]), std::ref(queues2[i]), std::ref(queues3[i]), queue4);
-                std::cout << "3: "<<i << std::endl;
-                threads.at(5+i*3) = std::thread(looper, 3, nitems, queue0, std::ref(queues1[i]), std::ref(queues2[i]), std::ref(queues3[i]), queue4);
-                std::cout << "4:"<< i << std::endl;
+                // std::cout << "loopstart: "<< i << std::endl;
+                threads.at(3+i*3) = std::thread(looper, 1, nthreads, i, nitems, queue0, std::ref(queues1[i]), std::ref(queues2[i]), std::ref(queues3[i]), queue4);
+                // std::cout << "2: "<< i << std::endl;
+                threads.at(4+i*3) = std::thread(looper, 2, nthreads, i, nitems, queue0, std::ref(queues1[i]), std::ref(queues2[i]), std::ref(queues3[i]), queue4);
+                // std::cout << "3: "<<i << std::endl;
+                threads.at(5+i*3) = std::thread(looper, 3, nthreads, i, nitems, queue0, std::ref(queues1[i]), std::ref(queues2[i]), std::ref(queues3[i]), queue4);
+                // std::cout << "4:"<< i << std::endl;
                 threads.at(3+i*3).detach();
                 threads.at(4+i*3).detach();
                 threads.at(5+i*3).detach();
         }
-        std::cout << "4,5" << std::endl;
-        threads.at(2+nthreads*3) = std::thread(looper, 4, nitems, queue0, std::ref(queues1[0]), std::ref(queues2[0]), std::ref(queues3[0]), queue4);
-        std::cout << "5" << std::endl;
+        // std::cout << "4,5" << std::endl;
+        threads.at(2+nthreads*3) = std::thread(looper, 4, nthreads, 0, nitems, queue0, std::ref(queues1[0]), std::ref(queues2[0]), std::ref(queues3[0]), queue4);
+        // std::cout << "5" << std::endl;
 
 
         threads.at(0).join();
