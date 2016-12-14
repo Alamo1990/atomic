@@ -121,7 +121,6 @@ void looper(int mode, int nitems, atomic_buffer<std::pair<int,std::vector<std::v
             atomic_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3,
             atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 ){
         enum exec { M, F, B, I, P };
-        bool last = false;
 
         double MaxRe;
         double MinRe;
@@ -129,52 +128,32 @@ void looper(int mode, int nitems, atomic_buffer<std::pair<int,std::vector<std::v
 
         switch (mode) {
         case M:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
-
-                queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), last); // no se si true o false
-            } break;
+                for(int i = 0; i<nitems; i++) {
+                        MaxRe = 0.1 + i *0.1;
+                        MinRe = -2.0 - i *0.1;
+                        MinIm = -1.2 - i *0.1;
+                        queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), false); // no se si true o false
+                } break;
         case F:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
-
-                auto image = std::get<1>(queue1->get());
-                queue2->put(FFT(image), last);
-            } break;
+                for(int i = 0; i<nitems; i++) {
+                        auto image = std::get<1>(queue1->get());
+                        queue2->put(FFT(image), false);
+                } break;
         case B:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
-
-                auto image = std::get<1>(queue2->get());
-                queue3->put(Blur(image), last);
-            } break;
+                for(int i = 0; i<nitems; i++) {
+                        auto image = std::get<1>(queue2->get());
+                        queue3->put(Blur(image), false);
+                        std::get<0>(queue2->get());
+                } break;
         case I:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
-
-                auto image = std::get<1>(queue3->get());
-                queue4->put(IFFT(image), last);
-            } break;
+                for(int i = 0; i<nitems; i++) {
+                        auto image = std::get<1>(queue3->get());
+                        queue4->put(IFFT(image), false);
+                } break;
         case P:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-
-                print(std::get<1>(queue4->get()));
-            } break;
+                for(int i = 0; i<nitems; i++) {
+                        print(std::get<1>(queue4->get()));
+                } break;
         }
 }
 
@@ -193,17 +172,12 @@ int main(int argc, char* argv[]){
         atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 = new atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size);
 
         std::thread threads[5];
-        std::cout << "3" << std::endl;
+        //                    looper(function to be called, number of images, all the queues)
         threads[0] = std::thread(looper, 0, nitems, queue1, queue2, queue3, queue4);
-        std::cout << "4" << std::endl;
         threads[1] = std::thread(looper, 1, nitems, queue1, queue2, queue3, queue4);
-        std::cout << "5" << std::endl;
         threads[2] = std::thread(looper, 2, nitems, queue1, queue2, queue3, queue4);
-        std::cout << "6" << std::endl;
         threads[3] = std::thread(looper, 3, nitems, queue1, queue2, queue3, queue4);
-        std::cout << "7" << std::endl;
         threads[4] = std::thread(looper, 4, nitems, queue1, queue2, queue3, queue4);
-        std::cout << "8" << std::endl;
 
         for(auto& th : threads) th.join();
 
