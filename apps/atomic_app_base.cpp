@@ -12,6 +12,7 @@
 #define NTHREADS 4
 constexpr int ImageHeight = 36;
 constexpr int ImageWidth = 36;
+using namespace std;
 
 std::pair<int,std::vector<std::vector<unsigned char> > > mandelbrot(double MaxRe, double MinRe, double MinIm, int order){
         std::vector<std::vector<unsigned char> > image(ImageHeight, std::vector<unsigned char>(ImageWidth,0));
@@ -117,69 +118,80 @@ void print(std::pair<int, std::vector<std::vector<unsigned char> > > image){
 }
 
 
-void looper(int mode, int nitems, atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1,
-            atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2,
-            atomic_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3,
-            atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 ){
-        enum exec { M, F, B, I, P };
+//using uchar_matrix = vector<vector<unsigned char> >;
+using uchar_matrix      =   vector<vector<unsigned char>>;
+using complex_matrix    =   vector<vector<complex<double>>>;
 
-        double MaxRe;
-        double MinRe;
-        double MinIm;
+void looper(int mode,
+    int nitems,
+    atomic_buffer<pair<int, uchar_matrix > >*   queue1,
+    atomic_buffer<pair<int, complex_matrix > >* queue2,
+    atomic_buffer<pair<int, complex_matrix > >* queue3,
+    atomic_buffer<pair<int, uchar_matrix > >*   queue4 ){
 
-        switch (mode) {
-        case M:
-                for(int i = 0; i<nitems; i++) {
-                        MaxRe = 0.1 + i *0.1;
-                        MinRe = -2.0 - i *0.1;
-                        MinIm = -1.2 - i *0.1;
-                        queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), false);
-                } break;
-        case F:
-                for(int i = 0; i<nitems; i++) {
-                        auto image = std::get<1>(queue1->get());
-                        queue2->put(FFT(image), false);
-                } break;
-        case B:
-                for(int i = 0; i<nitems; i++) {
-                        auto image = std::get<1>(queue2->get());
-                        queue3->put(Blur(image), false);
-                } break;
-        case I:
-                for(int i = 0; i<nitems; i++) {
-                        auto image = std::get<1>(queue3->get());
-                        queue4->put(IFFT(image), false);
-                } break;
-        case P:
-                for(int i = 0; i<nitems; i++) {
-                        print(std::get<1>(queue4->get()));
-                } break;
-        }
+    enum exec { Mandelbrot_fn, FFT_fn, Blur_fn, IFFT_fn, Print_fn };
+    double MaxRe;
+    double MinRe;
+    double MinIm;
+
+    switch (mode) {
+    case Mandelbrot_fn:
+        for(int i = 0; i<nitems; i++)
+        {
+            MaxRe = 0.1 + i *0.1;
+            MinRe = -2.0 - i *0.1;
+            MinIm = -1.2 - i *0.1;
+            queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), false);
+        } break;
+    case FFT_fn:
+        for(int i = 0; i<nitems; i++)
+        {
+            auto image = std::get<1>(queue1->get());
+            queue2->put(FFT(image), false);
+        } break;
+    case Blur_fn:
+        for(int i = 0; i<nitems; i++)
+        {
+            auto image = std::get<1>(queue2->get());
+            queue3->put(Blur(image), false);
+        } break;
+    case IFFT_fn:
+        for(int i = 0; i<nitems; i++)
+        {
+            auto image = std::get<1>(queue3->get());
+            queue4->put(IFFT(image), false);
+        } break;
+    case Print_fn:
+        for(int i = 0; i<nitems; i++)
+        {
+            print(std::get<1>(queue4->get()));
+        } break;
+    }
 }
 
 int main(int argc, char* argv[]){
         std::chrono::time_point<std::chrono::system_clock> start, end;
         start = std::chrono::system_clock::now();
         if(argc != 3) {
-                std::cerr<<"Wrong arguments"<<std::endl;
-                std::cerr<<"Valid formats: "<<std::endl;
-                std::cerr<< " " << argv[0] << "nitems" << std::endl;
+                cerr<<"Wrong arguments"<<endl;
+                cerr<<"Valid formats: "<<endl;
+                cerr<< " " << argv[0] << "nitems" << endl;
         }
-        const long nitems = std::stol(argv[1]);
-        const int buff_size = std::stoi(argv[2]);
+        const long nitems = stol(argv[1]);
+        const int buff_size = stoi(argv[2]);
 
-        atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue1 = new atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size);
-        atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >* queue2 = new atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >(buff_size);
-        atomic_buffer<std::pair<int, std::vector< std::vector< std::complex<double> > > > >* queue3 = new atomic_buffer<std::pair<int,std::vector<std::vector<std::complex<double> > > > >(buff_size);
-        atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >* queue4 = new atomic_buffer<std::pair<int,std::vector<std::vector<unsigned char> > > >(buff_size);
+        auto queue1 = new atomic_buffer<pair<int,uchar_matrix   > >(buff_size);
+        auto queue2 = new atomic_buffer<pair<int,complex_matrix > >(buff_size);
+        auto queue3 = new atomic_buffer<pair<int,complex_matrix > >(buff_size);
+        auto queue4 = new atomic_buffer<pair<int,uchar_matrix   > >(buff_size);
 
-        std::thread threads[5];
-        //                    looper(function to be called, number of images, all the queues)
-        threads[0] = std::thread(looper, 0, nitems, queue1, queue2, queue3, queue4);
-        threads[1] = std::thread(looper, 1, nitems, queue1, queue2, queue3, queue4);
-        threads[2] = std::thread(looper, 2, nitems, queue1, queue2, queue3, queue4);
-        threads[3] = std::thread(looper, 3, nitems, queue1, queue2, queue3, queue4);
-        threads[4] = std::thread(looper, 4, nitems, queue1, queue2, queue3, queue4);
+        thread threads[5];
+
+        threads[0] = thread(looper, 0, nitems, queue1, queue2, queue3, queue4);
+        threads[1] = thread(looper, 1, nitems, queue1, queue2, queue3, queue4);
+        threads[2] = thread(looper, 2, nitems, queue1, queue2, queue3, queue4);
+        threads[3] = thread(looper, 3, nitems, queue1, queue2, queue3, queue4);
+        threads[4] = thread(looper, 4, nitems, queue1, queue2, queue3, queue4);
 
         for(auto& th : threads) th.join();
 
