@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <utility>
 #include <fstream>
+#include <chrono>
 
 #define NTHREADS 4
 constexpr int ImageHeight = 36;
@@ -123,61 +124,47 @@ void looper(int mode, int nitems, locked_buffer<pair<int,vector<vector<unsigned 
             locked_buffer<pair<int, vector< vector< complex<double> > > > >* queue3,
             locked_buffer<pair<int,vector<vector<unsigned char> > > >* queue4 ){
         enum exec { M, F, B, I, P };
-        bool last = false;
 
         double MaxRe;
         double MinRe;
         double MinIm;
 
+
         switch (mode) {
         case M:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
-                queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), last);
-            } break;
+                for(int i = 0; i<nitems; i++) {
+                        MaxRe = 0.1 + i *0.1;
+                        MinRe = -2.0 - i *0.1;
+                        MinIm = -1.2 - i *0.1;
+                        queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), false);
+                } break;
         case F:
-          for(int i = 0; i<nitems; i++) {
-              MaxRe = 0.1 + i *0.1;
-              MinRe = -2.0 - i *0.1;
-              MinIm = -1.2 - i *0.1;
-              if(i == (nitems-1)) last=true;
-              auto image = get<1>(queue1->get());
-              queue2->put(FFT(image), last);
-          } break;
+                for(int i = 0; i<nitems; i++) {
+                        auto image = std::get<1>(queue1->get());
+                        queue2->put(FFT(image), false);
+                } break;
         case B:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
-                auto image = get<1>(queue2->get());
-                queue3->put(Blur(image), last);
-            } break;
+                for(int i = 0; i<nitems; i++) {
+                        auto image = std::get<1>(queue2->get());
+                        queue3->put(Blur(image), false);
+                } break;
         case I:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                if(i == (nitems-1)) last=true;
-                auto image = get<1>(queue3->get());
-                queue4->put(IFFT(image), last);
-            } break;
+                for(int i = 0; i<nitems; i++) {
+                        auto image = std::get<1>(queue3->get());
+                        queue4->put(IFFT(image), false);
+                } break;
         case P:
-            for(int i = 0; i<nitems; i++) {
-                MaxRe = 0.1 + i *0.1;
-                MinRe = -2.0 - i *0.1;
-                MinIm = -1.2 - i *0.1;
-                print(get<1>(queue4->get()));
-            } break;
+                for(int i = 0; i<nitems; i++) {
+                        print(std::get<1>(queue4->get()));
+                } break;
         }
 }
 
 using uchar_matrix = vector<vector<unsigned char> >;
 
 int main(int argc, char* argv[]){
+        std::chrono::time_point<std::chrono::system_clock> start, end;
+        start = std::chrono::system_clock::now();
         if(argc != 3) {
                 cerr<<"Wrong arguments"<<endl;
                 cerr<<"Valid formats: "<<endl;
@@ -200,6 +187,14 @@ int main(int argc, char* argv[]){
         threads[4] = thread(looper, 4, nitems, queue1, queue2, queue3, queue4);
 
         for(auto& th : threads) th.join();
+
+        end = std::chrono::system_clock::now();
+
+        int elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>
+                                           (end-start).count();
+        std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+        std::cout << "End time:  " << std::ctime(&end_time)
+                  << "\ntime elapsed: " << elapsed_milliseconds << "ms\n";
 
         return 0;
 }

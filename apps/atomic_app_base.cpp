@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <utility>
 #include <fstream>
+#include <chrono>
 
 #define NTHREADS 4
 constexpr int ImageHeight = 36;
@@ -132,7 +133,7 @@ void looper(int mode, int nitems, atomic_buffer<std::pair<int,std::vector<std::v
                         MaxRe = 0.1 + i *0.1;
                         MinRe = -2.0 - i *0.1;
                         MinIm = -1.2 - i *0.1;
-                        queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), false); // no se si true o false
+                        queue1->put(mandelbrot(MaxRe, MinRe, MinIm, i), false);
                 } break;
         case F:
                 for(int i = 0; i<nitems; i++) {
@@ -143,7 +144,6 @@ void looper(int mode, int nitems, atomic_buffer<std::pair<int,std::vector<std::v
                 for(int i = 0; i<nitems; i++) {
                         auto image = std::get<1>(queue2->get());
                         queue3->put(Blur(image), false);
-                        std::get<0>(queue2->get());
                 } break;
         case I:
                 for(int i = 0; i<nitems; i++) {
@@ -158,6 +158,8 @@ void looper(int mode, int nitems, atomic_buffer<std::pair<int,std::vector<std::v
 }
 
 int main(int argc, char* argv[]){
+        std::chrono::time_point<std::chrono::system_clock> start, end;
+        start = std::chrono::system_clock::now();
         if(argc != 3) {
                 std::cerr<<"Wrong arguments"<<std::endl;
                 std::cerr<<"Valid formats: "<<std::endl;
@@ -181,6 +183,13 @@ int main(int argc, char* argv[]){
 
         for(auto& th : threads) th.join();
 
+        end = std::chrono::system_clock::now();
+
+        int elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>
+                                           (end-start).count();
+        std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+        std::cout << "End time:  " << std::ctime(&end_time)
+                  << "\ntime elapsed: " << elapsed_milliseconds << "ms\n";
 
         return 0;
 }

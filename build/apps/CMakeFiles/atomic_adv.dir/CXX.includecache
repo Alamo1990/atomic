@@ -27,7 +27,7 @@ fstream
 -
 atomic
 -
-algorithm
+chrono
 -
 
 /home/alamo/Documents/arquitecturaComputadors/atomic/include/atomic_buffer.h

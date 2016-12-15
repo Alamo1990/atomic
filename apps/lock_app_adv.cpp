@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <utility>
 #include <fstream>
-#include <algorithm>
+#include <chrono>
 
 #define NTHREADS 4
 constexpr int ImageHeight = 36;
@@ -190,6 +190,8 @@ void looper(int mode, int nitems,
 }
 
 int main(int argc, char* argv[]){
+        std::chrono::time_point<std::chrono::system_clock> start, end;
+        start = std::chrono::system_clock::now();
         if(argc != 4) {
                 cerr<<"Wrong arguments"<<endl;
                 cerr<<"Valid formats: "<<endl;
@@ -198,6 +200,7 @@ int main(int argc, char* argv[]){
         const long nitems = stol(argv[1]);
         const int buff_size = stoi(argv[2]);
         const int nthreads = stoi(argv[3]);
+
 
         locked_buffer<pair<int,vector<vector<unsigned char> > > >* queue0 = new locked_buffer<pair<int,vector<vector<unsigned char> > > >(buff_size);
 
@@ -229,6 +232,14 @@ int main(int argc, char* argv[]){
         threads.at(0).join();
         threads.at(1).join();
         threads.at(2+nthreads*3).join();
+
+        end = std::chrono::system_clock::now();
+
+        int elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>
+                                           (end-start).count();
+        std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+        std::cout << "End time:  " << std::ctime(&end_time)
+                  << "\ntime elapsed: " << elapsed_milliseconds << "ms\n";
 
         return 0;
 }
